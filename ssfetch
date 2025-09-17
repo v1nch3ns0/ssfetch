@@ -1,0 +1,36 @@
+#!/bin/sh
+# simple fetch script in shell
+colour="\033[34m"
+secondary_colour="\033[36m"
+reset="\033[0m"
+bold="\033[1m"
+case $1 in
+--config) config="$2" ;;
+*) ;;
+esac
+if [ -f "$config" ]; then
+. "$config"
+fi
+. "/etc/os-release"
+kernel=$(uname -r)
+uptime=$(uptime -p)
+shell=$(basename $SHELL)
+user=$(whoami)
+arch=$(uname -m)
+hostname=$(cat "/etc/hostname")
+mem_total=$(grep MemTotal /proc/meminfo | awk '{print $2}')
+mem_avail=$(grep MemAvailable /proc/meminfo | awk '{print $2}') # straight from stack overflow gang ):
+mem_used=$(($mem_total - $mem_avail))
+mem_used=$(($mem_used / 1024))
+mem_total=$(($mem_total / 1024))
+name=$NAME
+cpu=$(grep -m1 'model name' /proc/cpuinfo | cut -d: -f2- | sed 's/^ *//') # also stack overflow 
+printf "${bold}${colour}${user}@${hostname}${reset}\n"
+printf "${bold}-----------------------${reset}\n"
+printf "${bold}${colour}name:      ${reset}${secondary_colour}${name}${reset}\n"
+printf "${bold}${colour}kernel:    ${reset}${secondary_colour}${kernel}${reset}\n"
+printf "${bold}${colour}shell:     ${reset}${secondary_colour}${shell}${reset}\n"
+printf "${bold}${colour}uptime:    ${reset}${secondary_colour}${uptime}${reset}\n"
+printf "${bold}${colour}arch:      ${reset}${secondary_colour}${arch}${reset}\n"
+printf "${bold}${colour}cpu:       ${reset}${secondary_colour}${cpu}${reset}\n"
+printf "${bold}${colour}mem:       ${reset}${secondary_colour}${mem_used}MB/${mem_total}MB${reset}\n"
